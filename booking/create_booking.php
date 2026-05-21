@@ -35,12 +35,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // === SKENARIO PENGUJIAN 3: VALIDASI SLOT BENTROK ===
     // Memeriksa apakah pencukur tersebut sudah memiliki booking aktif di tanggal & jam yang sama
-    $query_cek = "SELECT id FROM tb_booking 
-                  WHERE pencukur_id = '$pencukur_id' 
-                  AND booking_date = '$booking_date' 
-                  AND booking_time = '$booking_time' 
-                  AND status != 'batal'";
-                  
+    $query_cek = "SELECT id FROM tb_booking
+    WHERE pencukur_id = '$pencukur_id'
+    AND booking_date = '$booking_date'
+    AND booking_time = '$booking_time'
+    AND status != 'batal'";
+    
     $result_cek = mysqli_query($conn, $query_cek);
 
     if (mysqli_num_rows($result_cek) > 0) {
@@ -54,8 +54,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // === SKENARIO PENGUJIAN 2: GENERATE NO QUEUE (ENQUEUE) ===
     // Mengambil nomor antrean tertinggi pada tanggal tersebut untuk pencukur terkait
-    $query_queue = "SELECT MAX(queue_number) as max_queue FROM tb_booking 
-                    WHERE booking_date = '$booking_date' 
+    $query_queue = "SELECT MAX(queue_number) as max_queue FROM tb_booking
+                    WHERE booking_date = '$booking_date'
                     AND pencukur_id = '$pencukur_id'";
                     
     $result_queue = mysqli_query($conn, $query_queue);
@@ -66,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // === SKENARIO PENGUJIAN 1: INSERT DATA KE tb_booking ===
     $query_insert = "INSERT INTO tb_booking (user_id, pencukur_id, booking_date, booking_time, queue_number, jumlah_orang, status, created_at) 
-                     VALUES ('$user_id', '$pencukur_id', '$booking_date', '$booking_time', '$queue_number', '$jumlah_orang', 'menunggu', NOW())";
+    VALUES ('$user_id', '$pencukur_id', '$booking_date', '$booking_time', '$queue_number', '$jumlah_orang', 'menunggu', NOW())";
 
     if (mysqli_query($conn, $query_insert)) {
         // Output JSON sukses sesuai target format tugas akhirmu
