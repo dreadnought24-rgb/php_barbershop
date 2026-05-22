@@ -1,13 +1,8 @@
 <?php
 
-// Koneksi database
-$conn = mysqli_connect(
-    "localhost",
-    "root",
-    "",
-    "db_barbershop"
-);
+header("Content-Type: application/json");
 
+include "../config/database.php";
 // Query mengambil semua barber
 $query = mysqli_query(
     $conn,

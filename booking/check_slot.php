@@ -1,56 +1,25 @@
 <?php
+$conn = mysqli_connect("localhost", "root", "", "db_barbershop");
 
-// Koneksi database
-$conn = mysqli_connect(
-    "localhost",
-    "root",
-    "",
-    "db_barbershop"
-);
-
-// Mengambil tanggal dari Flutter
+// AMBIL DUA PARAMETER: tanggal dan id_pencukur
 $tanggal = $_GET['tanggal'];
+$id_pencukur = $_GET['id_pencukur'];
 
-// Semua slot yang tersedia
-$allSlots = [
+$allSlots = ["09.00", "10.00", "11.00", "12.00", "13.00"];
 
-    "09.00",
-    "10.00",
-    "11.00",
-    "12.00",
-    "13.00"
-];
-
-// Query slot yang sudah dibooking
+// Query disesuaikan agar hanya mengunci slot untuk pencukur tertentu saja
 $query = mysqli_query(
-
     $conn,
-
-    "SELECT jam
-     FROM tb_booking
-     WHERE tanggal='$tanggal'"
+    "SELECT jam FROM tb_booking WHERE tanggal='$tanggal' AND id_pencukur='$id_pencukur'"
 );
 
-// Array slot penuh
 $bookedSlots = [];
-
-// Mengambil data booking
 while($row = mysqli_fetch_assoc($query)){
-
-    // Memasukkan jam booking
     $bookedSlots[] = $row['jam'];
 }
 
-// Menghapus slot penuh
-$availableSlots = array_values(
+$availableSlots = array_values(array_diff($allSlots, $bookedSlots));
 
-    array_diff(
-        $allSlots,
-        $bookedSlots
-    )
-);
-
-// Mengirim JSON slot kosong
-echo json_encode(
-    $availableSlots
-);
+// Sesuai standarisasi Flutter kamu, bungkus dalam format JSON biasa
+echo json_encode($availableSlots);
+?>
