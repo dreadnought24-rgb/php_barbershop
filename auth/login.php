@@ -18,13 +18,9 @@ if(mysqli_num_rows($query) > 0){
 
         echo json_encode([
             "success" => true,
-            "message" => "Login berhasil",
-            "data" => [
-                "id" => $user['id'],
-                "username" => $user['username'],
-                "nama" => $user['nama'],
-                "role" => $user['role']
-            ]
+            "role" => $user['role'],
+            "user_id" => (int)$user['id'],
+            "message" => "Login berhasil"
         ]);
 
     }else{
