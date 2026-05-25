@@ -1,41 +1,26 @@
 <?php
-
 header("Content-Type: application/json");
+include '../config/db.php';
 
-require '../config/database.php';
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
-$id     = $_POST['id'];
-$status = $_POST['status'];
+    $booking_id = $_POST['booking_id'];
+    $status = $_POST['status'];
 
-if($status != 'bayar' && $status != 'cancel'){
+    $query = "UPDATE tb_booking SET status = ? WHERE id = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("si", $status, $booking_id);
 
-    echo json_encode([
-        "success" => false,
-        "message" => "Status tidak valid"
-    ]);
-
-    exit;
+    if ($stmt->execute()) {
+        echo json_encode([
+            "success" => true,
+            "message" => "Status updated"
+        ]);
+    } else {
+        echo json_encode([
+            "success" => false,
+            "message" => "Failed update"
+        ]);
+    }
 }
-
-$query = mysqli_query($conn,
-"UPDATE tb_booking
-SET status='$status'
-WHERE id='$id'");
-
-if($query){
-
-    echo json_encode([
-        "success" => true,
-        "message" => "Status updated"
-    ]);
-
-}else{
-
-    echo json_encode([
-        "success" => false,
-        "message" => "Gagal update status"
-    ]);
-
-}
-
 ?>
