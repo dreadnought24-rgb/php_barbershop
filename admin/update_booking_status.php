@@ -4,10 +4,9 @@ header("Content-Type: application/json");
 
 require '../config/database.php';
 
-$booking_id = $_POST['booking_id'];
-$status     = $_POST['status'];
+$id     = $_POST['id'];
+$status = $_POST['status'];
 
-// Validasi status
 if($status != 'bayar' && $status != 'cancel'){
 
     echo json_encode([
@@ -19,9 +18,9 @@ if($status != 'bayar' && $status != 'cancel'){
 }
 
 $query = mysqli_query($conn,
-"UPDATE tb_booking 
+"UPDATE tb_booking
 SET status='$status'
-WHERE booking_id='$booking_id'");
+WHERE id='$id'");
 
 if($query){
 
