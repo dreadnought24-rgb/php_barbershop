@@ -7,8 +7,10 @@ require '../config/database.php';
 $username = $_POST['username'];
 $password = $_POST['password'];
 
-$query = mysqli_query($conn,
-"SELECT * FROM tb_user WHERE username='$username'");
+$query = mysqli_query(
+    $conn,
+    "SELECT * FROM tb_user WHERE username='$username'"
+);
 
 if(mysqli_num_rows($query) > 0){
 
@@ -16,10 +18,20 @@ if(mysqli_num_rows($query) > 0){
 
     if(password_verify($password, $user['password'])){
 
+        if($user['role'] != 'admin' && $user['role'] != 'user'){
+
+            echo json_encode([
+                "success" => false,
+                "message" => "Role tidak valid"
+            ]);
+
+            exit;
+        }
+
         echo json_encode([
             "success" => true,
             "role" => $user['role'],
-            "user_id" => (int)$user['id'],
+            "id" => (int)$user['id'],
             "message" => "Login berhasil"
         ]);
 
