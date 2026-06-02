@@ -1,44 +1,53 @@
 <?php
+
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: POST");
 
 include_once '../config/database.php';
 
-$database = new Database();
-$db = $database->getConnection();
+$pencukur_id = isset($_POST['pencukur_id']) ? trim($_POST['pencukur_id']) : '';
 
-$pencukur_id = isset($_POST['pencukur_id']) ? $_POST['pencukur_id'] : null;
-
-if (!$pencukur_id) {
+if ($pencukur_id === '') {
     echo json_encode(["success" => false, "message" => "pencukur_id tidak ditemukan"]);
-    exit();
+    exit;
 }
 
-// Query mengambil antrean yang difilter HANYA untuk pencukur yang bersangkutan
-$query = "SELECT * FROM tb_booking WHERE pencukur_id = :pencukur_id ORDER BY tanggal_booking ASC, jam_booking ASC";
+$pencukur_id = mysqli_real_escape_string($conn, $pencukur_id);
 
-try {
-    $stmt = $db->prepare($query);
-    $stmt->bindParam(":pencukur_id", $pencukur_id);
-    $stmt->execute();
+$query = "
+SELECT
+    tb_booking.id,
+    tb_booking.id AS booking_id,
+    tb_booking.user_id,
+    tb_booking.pencukur_id,
+    tb_booking.booking_date,
+    tb_booking.booking_time,
+    tb_booking.queue_number,
+    tb_booking.status,
+    tb_booking.jumlah_orang,
+    COALESCE(tb_user.nama, '') AS nama_pelanggan,
+    COALESCE(tb_pencukur.nama_pencukur, '') AS nama_pencukur
+FROM tb_booking
+LEFT JOIN tb_user ON tb_booking.user_id = tb_user.id
+LEFT JOIN tb_pencukur ON tb_booking.pencukur_id = tb_pencukur.id
+WHERE tb_booking.pencukur_id = '$pencukur_id'
+    AND LOWER(TRIM(COALESCE(tb_booking.status, ''))) NOT IN ('selesai', 'done', 'finished')
+ORDER BY tb_booking.queue_number ASC, tb_booking.id ASC
+";
 
-    if ($stmt->rowCount() > 0) {
-        $bookings = [];
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $bookings[] = $row;
-        }
-        echo json_encode([
-            "success" => true,
-            "bookings" => $bookings
-        ]);
-    } else {
-        echo json_encode([
-            "success" => false,
-            "message" => "Tidak ada data antrean untuk pencukur ini."
-        ]);
+$result = mysqli_query($conn, $query);
+$bookings = [];
+
+if ($result) {
+    while ($row = mysqli_fetch_assoc($result)) {
+        $bookings[] = $row;
     }
-} catch (PDOException $e) {
-    echo json_encode(["success" => false, "message" => "Error database: " . $e->getMessage()]);
 }
+
+echo json_encode([
+    "success" => true,
+    "data" => $bookings
+]);
+
 ?>

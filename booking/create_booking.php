@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     WHERE pencukur_id = '$pencukur_id'
     AND booking_date = '$booking_date'
     AND booking_time = '$booking_time'
-    AND status != 'batal'";
+    AND LOWER(TRIM(COALESCE(status, ''))) NOT IN ('done', 'cancelled', 'batal')";
     
     $result_cek = mysqli_query($conn, $query_cek);
 
@@ -66,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // === SKENARIO PENGUJIAN 1: INSERT DATA KE tb_booking ===
     $query_insert = "INSERT INTO tb_booking (user_id, pencukur_id, booking_date, booking_time, queue_number, jumlah_orang, status, created_at) 
-    VALUES ('$user_id', '$pencukur_id', '$booking_date', '$booking_time', '$queue_number', '$jumlah_orang', 'menunggu', NOW())";
+    VALUES ('$user_id', '$pencukur_id', '$booking_date', '$booking_time', '$queue_number', '$jumlah_orang', 'waiting', NOW())";
 
     if (mysqli_query($conn, $query_insert)) {
         // Output JSON sukses sesuai target format tugas akhirmu

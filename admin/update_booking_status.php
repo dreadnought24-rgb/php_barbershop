@@ -1,13 +1,10 @@
 <?php
+
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: POST");
 
-// Menggunakan format PDO sesuai standar file database Anda sebelumnya
 include_once '../config/database.php';
-
-$database = new Database();
-$db = $database->getConnection();
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode([
@@ -17,8 +14,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-// Mengecek parameter 'id' yang dikirim dari Flutter
-if (!isset($_POST['id']) || !isset($_POST['status'])) {
+$id = isset($_POST['id']) ? trim($_POST['id']) : '';
+$status = isset($_POST['status']) ? trim($_POST['status']) : '';
+
+if ($id === '' || $status === '') {
     echo json_encode([
         "success" => false,
         "message" => "Missing parameter"
@@ -26,12 +25,17 @@ if (!isset($_POST['id']) || !isset($_POST['status'])) {
     exit;
 }
 
-$id = $_POST['id'];
-$status = trim($_POST['status']);
+$allowed_status = [
+    'menunggu',
+    'selesai',
+    'batal',
+    'cancelled',
+    'belum_bayar',
+    'belum bayar',
+    'bayar'
+];
 
-$allowed_status = ['belum bayar', 'bayar', 'cancelled'];
-
-if (!in_array($status, $allowed_status)) {
+if (!in_array($status, $allowed_status, true)) {
     echo json_encode([
         "success" => false,
         "message" => "Invalid status value"
@@ -39,30 +43,26 @@ if (!in_array($status, $allowed_status)) {
     exit;
 }
 
-// Query menggunakan parameter :id sesuai struktur tabel database Anda
-$query = "UPDATE tb_booking SET status = :status WHERE id = :id";
+$id = mysqli_real_escape_string($conn, $id);
+$status = mysqli_real_escape_string($conn, $status);
 
-try {
-    $stmt = $db->prepare($query);
-    
-    $stmt->bindParam(":status", $status);
-    $stmt->bindParam(":id", $id);
+// Sesuaikan status dari UI ke nilai enum database.
+if ($status === 'selesai') {
+    $status = 'done';
+}
 
-    if ($stmt->execute()) {
-        echo json_encode([
-            "success" => true,
-            "message" => "Status updated successfully"
-        ]);
-    } else {
-        echo json_encode([
-            "success" => false,
-            "message" => "Update failed"
-        ]);
-    }
-} catch (PDOException $e) {
+$query = mysqli_query($conn, "UPDATE tb_booking SET status = '$status' WHERE id = '$id'");
+
+if ($query) {
+    echo json_encode([
+        "success" => true,
+        "message" => "Status updated successfully"
+    ]);
+} else {
     echo json_encode([
         "success" => false,
-        "message" => "Database error: " . $e->getMessage()
+        "message" => "Update failed"
     ]);
 }
+
 ?>

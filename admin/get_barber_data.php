@@ -1,41 +1,40 @@
 <?php
+
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: POST");
 
 include_once '../config/database.php';
 
-$database = new Database();
-$db = $database->getConnection();
+$user_id = isset($_POST['user_id']) ? trim($_POST['user_id']) : '';
 
-$user_id = isset($_POST['user_id']) ? $_POST['user_id'] : null;
-
-if (!$user_id) {
+if ($user_id === '') {
     echo json_encode(["success" => false, "message" => "user_id tidak ditemukan"]);
-    exit();
+    exit;
 }
 
-$query = "SELECT pencukur_id, nama_pencukur FROM tb_pencukur WHERE user_id = :user_id LIMIT 1";
+$user_id = mysqli_real_escape_string($conn, $user_id);
 
-try {
-    $stmt = $db->prepare($query);
-    $stmt->bindParam(":user_id", $user_id);
-    $stmt->execute();
+$query = mysqli_query(
+    $conn,
+    "SELECT pencukur_id, nama_pencukur, status FROM tb_pencukur WHERE user_id = '$user_id' LIMIT 1"
+);
 
-    if ($stmt->rowCount() > 0) {
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        echo json_encode([
-            "success" => true,
-            "pencukur_id" => (int)$row['pencukur_id'],
-            "nama_pencukur" => $row['nama_pencukur']
-        ]);
-    } else {
-        echo json_encode([
-            "success" => false,
-            "message" => "Data pencukur tidak ditemukan untuk user ini."
-        ]);
-    }
-} catch (PDOException $e) {
-    echo json_encode(["success" => false, "message" => "Error database: " . $e->getMessage()]);
+if ($query && mysqli_num_rows($query) > 0) {
+    $row = mysqli_fetch_assoc($query);
+
+    echo json_encode([
+        "success" => true,
+        "id" => (int) $row['pencukur_id'],
+        "pencukur_id" => (int) $row['pencukur_id'],
+        "nama_pencukur" => $row['nama_pencukur'],
+        "status" => $row['status'] ?? ''
+    ]);
+} else {
+    echo json_encode([
+        "success" => false,
+        "message" => "Data pencukur tidak ditemukan untuk user ini."
+    ]);
 }
+
 ?>

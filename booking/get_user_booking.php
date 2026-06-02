@@ -1,27 +1,25 @@
 <?php
 
-header("Content-Type: application/json");
+header("Content-Type: application/json; charset=UTF-8");
+header("Access-Control-Allow-Origin: *");
 
-$conn = mysqli_connect(
-    "localhost",
-    "root",
-    "",
-    "db_barbershop"
-);
+include_once '../config/database.php';
 
-if (!$conn) {
+$user_id = isset($_GET['user_id']) ? trim($_GET['user_id']) : '';
+
+if ($user_id === '') {
     echo json_encode([
         "success" => false,
-        "message" => "Koneksi database gagal"
+        "message" => "user_id belum dikirim"
     ]);
     exit;
 }
 
-$user_id = $_GET['user_id'];
+$user_id = mysqli_real_escape_string($conn, $user_id);
 
 $query = mysqli_query($conn, "
 SELECT
-    tb_booking.id,
+    tb_booking.id AS booking_id,
     tb_booking.booking_date,
     tb_booking.booking_time,
     tb_booking.queue_number,
@@ -35,19 +33,18 @@ ORDER BY tb_booking.id DESC
 LIMIT 1
 ");
 
-if(mysqli_num_rows($query) > 0){
-
+if ($query && mysqli_num_rows($query) > 0) {
     $data = mysqli_fetch_assoc($query);
 
     echo json_encode([
         "success" => true,
         "data" => $data
     ]);
-
-}else{
-
+} else {
     echo json_encode([
         "success" => false,
         "message" => "Booking tidak ditemukan"
     ]);
 }
+
+?>
