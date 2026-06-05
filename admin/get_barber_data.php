@@ -13,16 +13,16 @@ if ($user_id === '') {
     exit;
 }
 
-<<<<<<< HEAD
-$user_id = mysqli_real_escape_string($conn, $user_id);
-=======
-$query = "SELECT id_pencukur, nama_pencukur FROM tb_pencukur WHERE id_pencukur = :user_id LIMIT 1";
->>>>>>> 37b04af5709fb01e090b21b46cf582508cf0caac
 
-$query = mysqli_query(
-    $conn,
-    "SELECT pencukur_id, nama_pencukur, status FROM tb_pencukur WHERE user_id = '$user_id' LIMIT 1"
-);
+$user_id = mysqli_real_escape_string($conn, $user_id);
+
+$query = "SELECT id_pencukur, nama_pencukur FROM tb_pencukur WHERE id_pencukur = :user_id LIMIT 1";
+
+
+// $query = mysqli_query(
+//     $conn,
+//     "SELECT pencukur_id, nama_pencukur, status FROM tb_pencukur WHERE user_id = '$user_id' LIMIT 1"
+// );
 
 <<<<<<< HEAD
 if ($query && mysqli_num_rows($query) > 0) {
