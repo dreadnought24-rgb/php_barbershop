@@ -13,13 +13,16 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
+// ── 1. TAMBAHKAN PENANGKAPAN DATA SERVICE DI SINI ────────────────────────────
 $user_id      = isset($_POST['user_id'])      ? trim($_POST['user_id'])      : '';
 $pencukur_id  = isset($_POST['pencukur_id'])  ? trim($_POST['pencukur_id'])  : '';
 $booking_date = isset($_POST['booking_date']) ? trim($_POST['booking_date']) : '';
 $booking_time = isset($_POST['booking_time']) ? trim($_POST['booking_time']) : '';
+$service = isset($_POST['layanan']) ? trim($_POST['layanan']) : ''; // ◄ Menangkap 'service' dari Flutter
 
-if (empty($user_id) || empty($pencukur_id) || empty($booking_date) || empty($booking_time)) {
-    echo json_encode(["success" => false, "message" => "Data tidak lengkap: user_id, pencukur_id, booking_date, booking_time wajib diisi."]);
+// Validasi data lengkap termasuk service
+if (empty($user_id) || empty($pencukur_id) || empty($booking_date) || empty($booking_time) || empty($service)) {
+    echo json_encode(["success" => false, "message" => "Data tidak lengkap: user_id, pencukur_id, booking_date, booking_time, dan service wajib diisi."]);
     exit;
 }
 
@@ -27,6 +30,7 @@ $user_id      = mysqli_real_escape_string($conn, $user_id);
 $pencukur_id  = mysqli_real_escape_string($conn, $pencukur_id);
 $booking_date = mysqli_real_escape_string($conn, $booking_date);
 $booking_time = mysqli_real_escape_string($conn, $booking_time);
+$service      = mysqli_real_escape_string($conn, $service); // ◄ Escape string untuk keamanan SQL Injection
 
 // Cek bentrok: hanya booking berstatus 'belum bayar' yang dianggap aktif
 $query_cek = "SELECT id FROM tb_booking
@@ -48,9 +52,9 @@ $result_queue = mysqli_query($conn, $query_queue);
 $row_queue    = mysqli_fetch_assoc($result_queue);
 $queue_number = ($row_queue['max_queue'] !== null) ? (int)$row_queue['max_queue'] + 1 : 1;
 
-// Insert - kolom sesuai tb_booking: id, user_id, pencukur_id, booking_date, booking_time, queue_number, status
-$query_insert = "INSERT INTO tb_booking (user_id, pencukur_id, booking_date, booking_time, queue_number, status)
-    VALUES ('$user_id', '$pencukur_id', '$booking_date', '$booking_time', '$queue_number', 'belum bayar')";
+// ── 2. PERBARUI QUERY INSERT (Masukkan kolom 'layanan' dan variabel '$service') ──
+$query_insert = "INSERT INTO tb_booking (user_id, pencukur_id, booking_date, booking_time, queue_number, status, layanan)
+    VALUES ('$user_id', '$pencukur_id', '$booking_date', '$booking_time', '$queue_number', 'belum bayar', '$service')";
 
 if (mysqli_query($conn, $query_insert)) {
     echo json_encode([

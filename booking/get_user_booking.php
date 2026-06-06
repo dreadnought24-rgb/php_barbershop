@@ -13,6 +13,7 @@ if ($user_id === '') {
 
 $user_id = mysqli_real_escape_string($conn, $user_id);
 
+// ── KODE DIPERBARUI: Menambahkan tb_booking.layanan ke dalam SELECT ──
 $query = mysqli_query($conn, "
     SELECT
         tb_booking.id AS booking_id,
@@ -20,6 +21,7 @@ $query = mysqli_query($conn, "
         tb_booking.booking_time,
         tb_booking.queue_number,
         tb_booking.status,
+        tb_booking.layanan,
         tb_pencukur.nama_pencukur
     FROM tb_booking
     JOIN tb_pencukur ON tb_booking.pencukur_id = tb_pencukur.id
@@ -32,6 +34,12 @@ if ($query && mysqli_num_rows($query) > 0) {
     $data = [];
 
     while($row = mysqli_fetch_assoc($query)){
+        // Jika data layanan di database kosong/null (misal pada transaksi lama)
+        // kita berikan nilai default agar Flutter tidak error saat memproses datanya
+        if (empty($row['layanan'])) {
+            $row['layanan'] = 'Classic Cut';
+        }
+        
         $data[] = $row;
     }
 
