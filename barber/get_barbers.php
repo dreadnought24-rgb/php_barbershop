@@ -12,9 +12,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 include "../config/database.php";
 // Query mengambil semua barber
+// Kode dsimpan, hapus nanti (15 - 19)
+// $query = mysqli_query(
+//     $conn,
+//     "SELECT * FROM tb_pencukur"
+// );
+
 $query = mysqli_query(
     $conn,
-    "SELECT * FROM tb_pencukur"
+    "SELECT * FROM tb_pencukur
+     WHERE status = 'available'"
 );
 
 if (!$query) {
