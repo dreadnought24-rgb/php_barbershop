@@ -25,13 +25,26 @@ $query = mysqli_query($conn, "
     JOIN tb_pencukur ON tb_booking.pencukur_id = tb_pencukur.id
     WHERE tb_booking.user_id = '$user_id'
     ORDER BY tb_booking.id DESC
-    LIMIT 1
 ");
 
 if ($query && mysqli_num_rows($query) > 0) {
-    $data = mysqli_fetch_assoc($query);
-    echo json_encode(["success" => true, "data" => $data]);
+
+    $data = [];
+
+    while($row = mysqli_fetch_assoc($query)){
+        $data[] = $row;
+    }
+
+    echo json_encode([
+        "success" => true,
+        "data" => $data
+    ]);
 } else {
-    echo json_encode(["success" => false, "message" => "Booking tidak ditemukan"]);
+
+    echo json_encode([
+        "success" => false,
+        "data" => []
+    ]);
+
 }
 ?>
