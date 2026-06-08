@@ -46,11 +46,33 @@ if (mysqli_num_rows($result_cek) > 0) {
 }
 
 // Generate queue number
-$query_queue  = "SELECT MAX(queue_number) as max_queue FROM tb_booking
-    WHERE booking_date = '$booking_date' AND pencukur_id = '$pencukur_id'";
+// Hitung posisi queue berdasarkan booking_time
+// Berapa banyak booking yang booking_time-nya lebih kecil dari booking baru
+$query_queue = "SELECT COUNT(*) as total FROM tb_booking
+    WHERE booking_date = '$booking_date' 
+    AND pencukur_id = '$pencukur_id'
+    AND booking_time < '$booking_time'
+    AND queue_number IS NOT NULL
+    AND status = 'belum bayar'";
 $result_queue = mysqli_query($conn, $query_queue);
 $row_queue    = mysqli_fetch_assoc($result_queue);
-$queue_number = ($row_queue['max_queue'] !== null) ? (int)$row_queue['max_queue'] + 1 : 1;
+$queue_number = (int)$row_queue['total'] + 1;
+
+// Geser queue_number semua booking yang booking_time-nya lebih besar
+$query_shift = "UPDATE tb_booking 
+    SET queue_number = queue_number + 1
+    WHERE booking_date = '$booking_date'
+    AND pencukur_id = '$pencukur_id'
+    AND booking_time > '$booking_time'
+    AND queue_number IS NOT NULL
+    AND status = 'belum bayar'";
+mysqli_query($conn, $query_shift);
+
+// $query_queue  = "SELECT MAX(queue_number) as max_queue FROM tb_booking
+//     WHERE booking_date = '$booking_date' AND pencukur_id = '$pencukur_id'";
+// $result_queue = mysqli_query($conn, $query_queue);
+// $row_queue    = mysqli_fetch_assoc($result_queue);
+// $queue_number = ($row_queue['max_queue'] !== null) ? (int)$row_queue['max_queue'] + 1 : 1;
 
 // ── 2. PERBARUI QUERY INSERT (Masukkan kolom 'layanan' dan variabel '$service') ──
 $query_insert = "INSERT INTO tb_booking (user_id, pencukur_id, booking_date, booking_time, queue_number, status, layanan)

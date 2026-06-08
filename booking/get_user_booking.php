@@ -17,6 +17,7 @@ $user_id = mysqli_real_escape_string($conn, $user_id);
 $query = mysqli_query($conn, "
     SELECT
         tb_booking.id AS booking_id,
+        tb_booking.pencukur_id,
         tb_booking.booking_date,
         tb_booking.booking_time,
         tb_booking.queue_number,
